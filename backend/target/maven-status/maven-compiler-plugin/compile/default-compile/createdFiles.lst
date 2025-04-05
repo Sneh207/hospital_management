@@ -1,0 +1,13 @@
+com\example\hospitalmanagement\controller\DoctorController.class
+com\example\hospitalmanagement\repository\DoctorRepository.class
+com\example\hospitalmanagement\model\Appointment.class
+com\example\hospitalmanagement\controller\PatientController.class
+com\example\hospitalmanagement\model\Patient.class
+com\example\hospitalmanagement\repository\PatientRepository.class
+com\example\hospitalmanagement\service\AppointmentService.class
+com\example\hospitalmanagement\HospitalManagementApplication.class
+com\example\hospitalmanagement\service\DoctorService.class
+com\example\hospitalmanagement\model\Doctor.class
+com\example\hospitalmanagement\repository\AppointmentRepository.class
+com\example\hospitalmanagement\controller\AppointmentController.class
+com\example\hospitalmanagement\service\PatientService.class
