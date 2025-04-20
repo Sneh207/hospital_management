@@ -14,6 +14,10 @@ public class Appointment {
     @JoinColumn(name = "doctor_id", referencedColumnName = "id") // Ensures correct FK mapping
     private Doctor doctor; // Change from String to Doctor (relation)
 
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false) // Maps to the 'patient_id' column in the database
+    private Patient patient;
+
     private String patientName;
     private String appointmentDate;
 

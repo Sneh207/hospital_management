@@ -28,4 +28,9 @@ public class DoctorService {
     public void deleteDoctor(Long id) {
         doctorRepository.deleteById(id);
     }
+
+    public Doctor findByEmail(String email) {
+        return doctorRepository.findByEmail(email).orElse(null);
+    }
+    
 }

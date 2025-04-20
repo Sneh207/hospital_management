@@ -3,6 +3,8 @@ package com.example.hospitalmanagement.controller;   //DEFINES THE PACKAGE IN TH
 import com.example.hospitalmanagement.model.Appointment;   //REPRESENTS THE APPOINTMENT AS DATABASE TABLE
 import com.example.hospitalmanagement.service.AppointmentService;    //CONTAINS THE LOGIC FOR HANDLING APPOINTMENTS
 import org.springframework.beans.factory.annotation.Autowired;    //USE IN MAPPING HTTP REQUESTS (GET, POST, PUT, DELETE) TO JAVA METHODS
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;      //USED FOR HANDLING COLLECTIONS
@@ -34,4 +36,16 @@ public class AppointmentController {
     public void deleteAppointment(@PathVariable Long id) {
         appointmentService.deleteAppointment(id);
     }
+
+    //new
+    @GetMapping("/patient/{patientId}")
+public ResponseEntity<?> getAppointmentsByPatient(@PathVariable Long patientId) {
+    try {
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatientId(patientId);
+        return ResponseEntity.ok(appointments);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error fetching appointments: " + e.getMessage());
+    }
+}
 }
