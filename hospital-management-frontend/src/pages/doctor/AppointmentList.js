@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { getAllAppointments, deleteAppointment } from '../../services/api';
-import { AuthContext } from '../context/AuthContext';
+import { getAllAppointments, updateAppointmentStatus } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('ALL');
+  const [dateFilter, setDateFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
   const { currentUser } = useContext(AuthContext);
 
   // Fetch appointments
@@ -21,6 +23,7 @@ const AppointmentList = () => {
         );
         
         setAppointments(doctorAppointments);
+        setError('');
       } catch (err) {
         setError('Failed to load appointments');
         console.error(err);
@@ -32,23 +35,59 @@ const AppointmentList = () => {
     fetchAppointments();
   }, [currentUser.id]);
 
-  // Handle appointment cancellation
-  const handleCancelAppointment = async (appointmentId) => {
-    if (window.confirm('Are you sure you want to cancel this appointment?')) {
-      try {
-        await deleteAppointment(appointmentId);
-        setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
-      } catch (err) {
-        setError('Failed to cancel appointment');
-        console.error(err);
+  // Handle appointment status update
+  const handleStatusUpdate = async (appointmentId, newStatus) => {
+    try {
+      const response = await updateAppointmentStatus(appointmentId, newStatus);
+      if (response?.data) {
+        setAppointments(appointments.map(appointment => 
+          appointment.id === appointmentId 
+            ? { ...appointment, status: newStatus }
+            : appointment
+        ));
+        setError('');
       }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setError(err.response?.data || 'Failed to update appointment status');
     }
   };
 
-  // Filter appointments based on selected filter
-  const filteredAppointments = filter === 'ALL' 
-    ? appointments 
-    : appointments.filter(appointment => appointment.status === filter);
+  // Filter appointments based on selected filters and search term
+  const filteredAppointments = appointments.filter(appointment => {
+    const matchesStatus = filter === 'ALL' || appointment.status === filter;
+    const matchesSearch = searchTerm === '' || 
+      appointment.patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.notes?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let matchesDate = true;
+    const appointmentDate = new Date(appointment.appointmentDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    switch (dateFilter) {
+      case 'TODAY':
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        matchesDate = appointmentDate >= today && appointmentDate < tomorrow;
+        break;
+      case 'UPCOMING':
+        matchesDate = appointmentDate >= today;
+        break;
+      case 'PAST':
+        matchesDate = appointmentDate < today;
+        break;
+      default:
+        matchesDate = true;
+    }
+
+    return matchesStatus && matchesSearch && matchesDate;
+  });
+
+  // Sort appointments by date
+  const sortedAppointments = [...filteredAppointments].sort((a, b) => 
+    new Date(a.appointmentDate) - new Date(b.appointmentDate)
+  );
 
   // Get badge class based on status
   const getStatusBadgeClass = (status) => {
@@ -57,11 +96,25 @@ const AppointmentList = () => {
         return 'bg-primary';
       case 'COMPLETED':
         return 'bg-success';
-      case 'CANCELLED':
-        return 'bg-danger';
+      case 'ACCEPTED':
+        return 'bg-info';
+      case 'REJECTED':
+        return 'bg-warning';
       default:
         return 'bg-secondary';
     }
+  };
+
+  // Format date and time
+  const formatDateTime = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    };
+    return new Date(dateString).toLocaleString(undefined, options);
   };
 
   return (
@@ -72,15 +125,58 @@ const AppointmentList = () => {
       
       <div className="card">
         <div className="card-body">
-          <div className="mb-4 d-flex justify-content-between align-items-center">
-            <h5 className="card-title mb-0">Manage Appointments</h5>
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search patients or notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="col-md-8">
+              <div className="btn-group float-end" role="group">
+                <button 
+                  type="button" 
+                  className={`btn ${dateFilter === 'ALL' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setDateFilter('ALL')}
+                >
+                  All Dates
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn ${dateFilter === 'TODAY' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setDateFilter('TODAY')}
+                >
+                  Today
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn ${dateFilter === 'UPCOMING' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setDateFilter('UPCOMING')}
+                >
+                  Upcoming
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn ${dateFilter === 'PAST' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setDateFilter('PAST')}
+                >
+                  Past
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4">
             <div className="btn-group" role="group">
               <button 
                 type="button" 
                 className={`btn ${filter === 'ALL' ? 'btn-primary' : 'btn-outline-primary'}`}
                 onClick={() => setFilter('ALL')}
               >
-                All
+                All Status
               </button>
               <button 
                 type="button" 
@@ -98,17 +194,29 @@ const AppointmentList = () => {
               </button>
               <button 
                 type="button" 
-                className={`btn ${filter === 'CANCELLED' ? 'btn-primary' : 'btn-outline-primary'}`}
-                onClick={() => setFilter('CANCELLED')}
+                className={`btn ${filter === 'ACCEPTED' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setFilter('ACCEPTED')}
               >
-                Cancelled
+                Accepted
+              </button>
+              <button 
+                type="button" 
+                className={`btn ${filter === 'REJECTED' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setFilter('REJECTED')}
+              >
+                Rejected
               </button>
             </div>
           </div>
           
           {loading ? (
-            <p className="text-center">Loading appointments...</p>
-          ) : filteredAppointments.length === 0 ? (
+            <div className="text-center py-4">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading appointments...</span>
+              </div>
+              <p className="mt-2">Loading appointments...</p>
+            </div>
+          ) : sortedAppointments.length === 0 ? (
             <div className="text-center py-4">
               <p>No appointments found.</p>
             </div>
@@ -126,9 +234,9 @@ const AppointmentList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAppointments.map((appointment) => (
+                  {sortedAppointments.map((appointment) => (
                     <tr key={appointment.id}>
-                      <td>{appointment.appointmentDate}</td>
+                      <td>{formatDateTime(appointment.appointmentDate)}</td>
                       <td>{appointment.patient.name}</td>
                       <td>{appointment.patient.contact}</td>
                       <td>
@@ -142,24 +250,28 @@ const AppointmentList = () => {
                           <div className="btn-group" role="group">
                             <button
                               className="btn btn-sm btn-success"
-                              onClick={() => {
-                                // This would typically update the appointment status to COMPLETED
-                                // For now, we'll just update the UI
-                                const updatedAppointments = appointments.map(a => 
-                                  a.id === appointment.id ? {...a, status: 'COMPLETED'} : a
-                                );
-                                setAppointments(updatedAppointments);
-                              }}
+                              onClick={() => handleStatusUpdate(appointment.id, 'ACCEPTED')}
+                              title="Accept appointment"
                             >
-                              Complete
+                              Accept
                             </button>
                             <button
-                              className="btn btn-sm btn-danger"
-                              onClick={() => handleCancelAppointment(appointment.id)}
+                              className="btn btn-sm btn-warning"
+                              onClick={() => handleStatusUpdate(appointment.id, 'REJECTED')}
+                              title="Reject appointment"
                             >
-                              Cancel
+                              Reject
                             </button>
                           </div>
+                        )}
+                        {appointment.status === 'ACCEPTED' && (
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() => handleStatusUpdate(appointment.id, 'COMPLETED')}
+                            title="Mark as completed"
+                          >
+                            Complete
+                          </button>
                         )}
                       </td>
                     </tr>

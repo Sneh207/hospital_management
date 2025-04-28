@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerPatient } from '../../services/api';
+import { registerDoctor } from '../../services/api';
 
-const PatientRegister = () => {
+const DoctorRegister = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    age: '',
-    gender: '',
-    contact: ''
+    specialization: '',
+    contact: '',
+    experience: ''
   });
 
   const [error, setError] = useState('');
@@ -25,8 +25,9 @@ const PatientRegister = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.age || !formData.gender || !formData.contact) {
-      setError('All fields are required');
+    if (!formData.name || !formData.email || !formData.password || 
+        !formData.confirmPassword || !formData.specialization) {
+      setError('Name, email, specialization, and password are required');
       return false;
     }
 
@@ -40,13 +41,13 @@ const PatientRegister = () => {
       return false;
     }
 
-    if (!/^\d{10}$/.test(formData.contact)) {
+    if (formData.contact && !/^\d{10}$/.test(formData.contact)) {
       setError('Contact number must be 10 digits');
       return false;
     }
 
-    if (isNaN(formData.age) || formData.age < 1) {
-      setError('Please enter a valid age');
+    if (formData.experience && (isNaN(formData.experience) || formData.experience < 0)) {
+      setError('Experience must be a positive number');
       return false;
     }
 
@@ -65,10 +66,11 @@ const PatientRegister = () => {
 
     try {
       const { confirmPassword, ...registrationData } = formData;
+      registrationData.experience = registrationData.experience ? parseInt(registrationData.experience) : null;
       
-      const response = await registerPatient(registrationData);
-      if (response && response.data) {
-        navigate('/patient/login', { 
+      const response = await registerDoctor(registrationData);
+      if (response?.data) {
+        navigate('/doctor/login', { 
           state: { message: 'Registration successful! Please login.' }
         });
       }
@@ -91,13 +93,13 @@ const PatientRegister = () => {
       <div className="col-md-6">
         <div className="card">
           <div className="card-body">
-            <h2 className="card-title text-center mb-4">Patient Registration</h2>
+            <h2 className="card-title text-center mb-4">Doctor Registration</h2>
             
             {error && <div className="alert alert-danger">{error}</div>}
             
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label htmlFor="name" className="form-label">Full Name</label>
+                <label htmlFor="name" className="form-label">Full Name*</label>
                 <input
                   type="text"
                   className="form-control"
@@ -110,7 +112,7 @@ const PatientRegister = () => {
               </div>
 
               <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
+                <label htmlFor="email" className="form-label">Email*</label>
                 <input
                   type="email"
                   className="form-control"
@@ -122,55 +124,52 @@ const PatientRegister = () => {
                 />
               </div>
 
+              <div className="mb-3">
+                <label htmlFor="specialization" className="form-label">Specialization*</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="specialization"
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g., Cardiology, Pediatrics, etc."
+                />
+              </div>
+
               <div className="row">
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="age" className="form-label">Age</label>
+                  <label htmlFor="contact" className="form-label">Contact Number</label>
                   <input
-                    type="number"
+                    type="tel"
                     className="form-control"
-                    id="age"
-                    name="age"
-                    value={formData.age}
+                    id="contact"
+                    name="contact"
+                    value={formData.contact}
                     onChange={handleChange}
-                    required
-                    min="1"
+                    pattern="[0-9]{10}"
+                    placeholder="10-digit number"
                   />
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="gender" className="form-label">Gender</label>
-                  <select
-                    className="form-select"
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
+                  <label htmlFor="experience" className="form-label">Years of Experience</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="experience"
+                    name="experience"
+                    value={formData.experience}
                     onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
+                    min="0"
+                    placeholder="Years of experience"
+                  />
                 </div>
               </div>
 
               <div className="mb-3">
-                <label htmlFor="contact" className="form-label">Contact Number</label>
-                <input
-                  type="tel"
-                  className="form-control"
-                  id="contact"
-                  name="contact"
-                  value={formData.contact}
-                  onChange={handleChange}
-                  required
-                  pattern="[0-9]{10}"
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">Password</label>
+                <label htmlFor="password" className="form-label">Password*</label>
                 <input
                   type="password"
                   className="form-control"
@@ -184,7 +183,7 @@ const PatientRegister = () => {
               </div>
 
               <div className="mb-3">
-                <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                <label htmlFor="confirmPassword" className="form-label">Confirm Password*</label>
                 <input
                   type="password"
                   className="form-control"
@@ -208,7 +207,7 @@ const PatientRegister = () => {
             </form>
 
             <div className="mt-3 text-center">
-              <p>Already have an account? <Link to="/patient/login">Login here</Link></p>
+              <p>Already have an account? <Link to="/doctor/login">Login here</Link></p>
             </div>
           </div>
         </div>
@@ -217,4 +216,4 @@ const PatientRegister = () => {
   );
 };
 
-export default PatientRegister;
+export default DoctorRegister;

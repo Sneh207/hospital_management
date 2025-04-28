@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { getPatientAppointments } from '../../services/api';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 
 const PatientDashboard = () => {
   const [appointments, setAppointments] = useState([]);
@@ -31,8 +31,10 @@ const PatientDashboard = () => {
         return 'bg-primary';
       case 'COMPLETED':
         return 'bg-success';
-      case 'CANCELLED':
-        return 'bg-danger';
+      case 'ACCEPTED':
+        return 'bg-info';
+      case 'REJECTED':
+        return 'bg-warning';
       default:
         return 'bg-secondary';
     }

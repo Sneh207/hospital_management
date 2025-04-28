@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../pages/context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
   const { isAuthenticated, isPatient, isDoctor, currentUser, logout } = useContext(AuthContext);
@@ -70,6 +70,7 @@ const Navbar = () => {
                   </button>
                   <ul className="dropdown-menu">
                     <li><Link className="dropdown-item" to="/doctor/login">Login</Link></li>
+                    <li><Link className="dropdown-item" to="/doctor/register">Register</Link></li>
                   </ul>
                 </div>
               </div>

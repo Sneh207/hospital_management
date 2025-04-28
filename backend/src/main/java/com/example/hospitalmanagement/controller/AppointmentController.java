@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;      //USED FOR HANDLING COLLECTIONS
 import java.util.Optional;      //USE FOR OPTIONAL VALUES TO USERS (DROPDOWN CASE)
+import java.util.Map;
 
 @RestController      //Marks the class as a REST API controller
 @RequestMapping("/appointments")     //Defines the base URL for all HTTP requests
+@CrossOrigin(origins = "*")
 public class AppointmentController {
 
     @Autowired
@@ -37,15 +39,44 @@ public class AppointmentController {
         appointmentService.deleteAppointment(id);
     }
 
-    //new
     @GetMapping("/patient/{patientId}")
-public ResponseEntity<?> getAppointmentsByPatient(@PathVariable Long patientId) {
-    try {
-        List<Appointment> appointments = appointmentService.getAppointmentsByPatientId(patientId);
-        return ResponseEntity.ok(appointments);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error fetching appointments: " + e.getMessage());
+    public ResponseEntity<?> getAppointmentsByPatient(@PathVariable Long patientId) {
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByPatientId(patientId);
+            return ResponseEntity.ok(appointments);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error fetching appointments: " + e.getMessage());
+        }
     }
-}
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> updateAppointmentStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> statusUpdate) {
+        try {
+            String newStatus = statusUpdate.get("status");
+            if (newStatus == null) {
+                return ResponseEntity.badRequest().body("Status is required");
+            }
+
+            Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
+            if (!appointment.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Appointment updatedAppointment = appointment.get();
+            try {
+                updatedAppointment.setStatus(Appointment.AppointmentStatus.valueOf(newStatus.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid status value. Valid values are: SCHEDULED, ACCEPTED, REJECTED, COMPLETED, CANCELLED");
+            }
+
+            updatedAppointment = appointmentService.saveAppointment(updatedAppointment);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating appointment status: " + e.getMessage());
+        }
+    }
 }

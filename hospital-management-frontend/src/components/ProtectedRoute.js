@@ -1,23 +1,17 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../pages/context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children, userType }) => {
-  const { currentUser, userType: currentUserType } = useContext(AuthContext);
+  const { isAuthenticated, userType: currentUserType } = useContext(AuthContext);
 
-  if (!currentUser) {
-    // Redirect to home if not logged in
-    return <Navigate to="/" />;
+  if (!isAuthenticated) {
+    return <Navigate to={`/${userType}/login`} />;
   }
 
   if (userType && userType !== currentUserType) {
     // Redirect to appropriate dashboard if wrong user type
-    if (currentUserType === 'patient') {
-      return <Navigate to="/patient/dashboard" />;
-    } else if (currentUserType === 'doctor') {
-      return <Navigate to="/doctor/dashboard" />;
-    }
-    return <Navigate to="/" />;
+    return <Navigate to={`/${currentUserType}/dashboard`} />;
   }
 
   return children;

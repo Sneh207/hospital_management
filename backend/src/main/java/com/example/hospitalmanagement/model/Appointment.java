@@ -1,6 +1,6 @@
 package com.example.hospitalmanagement.model;
 
-import jakarta.persistence.*;    //this api is used for relational mapping of objects(java objects to databse tables)
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "appointments")
@@ -11,15 +11,25 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", referencedColumnName = "id") // Ensures correct FK mapping
-    private Doctor doctor; // Change from String to Doctor (relation)
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false) // Maps to the 'patient_id' column in the database
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    private String patientName;
+    @Column(nullable = false)
     private String appointmentDate;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus status = AppointmentStatus.SCHEDULED;
+
+    private String notes;
+
+    public enum AppointmentStatus {
+        SCHEDULED, ACCEPTED, REJECTED, COMPLETED
+    }
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -28,9 +38,15 @@ public class Appointment {
     public Doctor getDoctor() { return doctor; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }
 
-    public String getPatientName() { return patientName; }
-    public void setPatientName(String patientName) { this.patientName = patientName; }
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
 
     public String getAppointmentDate() { return appointmentDate; }
     public void setAppointmentDate(String appointmentDate) { this.appointmentDate = appointmentDate; }
+
+    public AppointmentStatus getStatus() { return status; }
+    public void setStatus(AppointmentStatus status) { this.status = status; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }
