@@ -63,22 +63,25 @@ const BookAppointment = () => {
         throw new Error('Please select an appointment date and time');
       }
 
-      // Create appointment data
+      // Simplified appointment data with only necessary information
       const appointmentData = {
-        doctor: selectedDoctor,
-        patient: currentUser,
+        doctor: { id: parseInt(formData.doctorId) },
+        patient: { id: currentUser.id },
         appointmentDate: formData.appointmentDate,
-        notes: formData.notes || '',
-        status: 'SCHEDULED'
+        notes: formData.notes || ''
       };
 
-      await createAppointment(appointmentData);
-      navigate('/patient/dashboard', { 
-        state: { message: 'Appointment booked successfully!' }
-      });
+      const response = await createAppointment(appointmentData);
+      if (response.status === 200) {
+        navigate('/patient/dashboard', { 
+          state: { message: 'Appointment booked successfully!' }
+        });
+      } else {
+        throw new Error(response.data || 'Failed to book appointment');
+      }
     } catch (err) {
-      setError(err.message || 'Failed to book appointment. Please try again.');
       console.error('Appointment booking error:', err);
+      setError(err.response?.data || err.message || 'Failed to book appointment. Please try again.');
     } finally {
       setSubmitting(false);
     }

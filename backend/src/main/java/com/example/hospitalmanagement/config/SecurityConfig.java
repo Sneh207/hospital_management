@@ -31,10 +31,9 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
-                    "/patients", "/patients/login", "/patients/register", "/patients/{id}",
-                    "/doctors", "/doctors/login", "/doctors/register", "/doctors/{id}",
-                    "/appointments", "/appointments/{id}", "/appointments/patient/{patientId}",
-                    "/appointments/{id}/status"
+                    "/patients/**",
+                    "/doctors/**",
+                    "/appointments/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             );

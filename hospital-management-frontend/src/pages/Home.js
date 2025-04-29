@@ -6,7 +6,7 @@ const Home = () => {
     <div className="container">
       <div className="row justify-content-center mb-5">
         <div className="col-md-8 text-center">
-          <h1 className="display-4 mb-4">Welcome to Hospital Management System</h1>
+          <h1 className="display-4 mb-4">Welcome to MediAxis</h1>
           <p className="lead">
             Streamline your healthcare experience with our comprehensive hospital management solution.
           </p>
@@ -17,21 +17,16 @@ const Home = () => {
         <div className="col-md-6 mb-4">
           <div className="card h-100">
             <div className="card-body">
-              <h3 className="card-title">For Patients</h3>
+            <h3 className="card-title">Our Mission</h3>
               <p className="card-text">
-                Access quality healthcare services with ease. Book appointments, manage your medical records,
-                and communicate with healthcare providers all in one place.
+              To make healthcare more accessible, efficient, and
+              patient-friendly by automating key hospital processes,
+              enhancing patient-doctor interactions, and ensuring
+              smooth operational workflows for medical professionals
+              — all through a unified platform that simplifies access
+              to care, centralizes medical data, and improves communication
+              for better health outcomes.
               </p>
-              <ul className="list-unstyled">
-                <li>✓ Easy appointment booking</li>
-                <li>✓ View appointment history</li>
-                <li>✓ Access medical records</li>
-                <li>✓ Choose from qualified doctors</li>
-              </ul>
-              <div className="mt-4">
-                <Link to="/patient/login" className="btn btn-primary me-2">Login</Link>
-                <Link to="/patient/register" className="btn btn-outline-primary">Register</Link>
-              </div>
             </div>
           </div>
         </div>
@@ -39,20 +34,14 @@ const Home = () => {
         <div className="col-md-6 mb-4">
           <div className="card h-100">
             <div className="card-body">
-              <h3 className="card-title">For Doctors</h3>
+              <h3 className="card-title">Key Features</h3>
               <p className="card-text">
-                Efficiently manage your practice and provide better care for your patients.
-                Access patient records, manage appointments, and more.
+              MediAxis offers secure login for doctors and patients, fast 
+              appointment booking with real-time updates, and doctor-controlled 
+              approvals. Personalized calendars help doctors manage their 
+              schedules efficiently, ensuring better time management, reduced
+              overlaps, and a seamless experience for both healthcare providers and patients.
               </p>
-              <ul className="list-unstyled">
-                <li>✓ Manage appointments</li>
-                <li>✓ View patient histories</li>
-                <li>✓ Track patient progress</li>
-                <li>✓ Efficient scheduling</li>
-              </ul>
-              <div className="mt-4">
-                <Link to="/doctor/login" className="btn btn-primary">Login</Link>
-              </div>
             </div>
           </div>
         </div>
@@ -67,19 +56,19 @@ const Home = () => {
                 <div className="col-md-4 mb-3">
                   <div className="feature">
                     <h4>Easy Access</h4>
-                    <p>Book appointments anytime, anywhere</p>
+                    <p>Book and manage appointments anytime, anywhere</p>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="feature">
                     <h4>Quality Care</h4>
-                    <p>Expert healthcare professionals</p>
+                    <p> Connect with expert healthcare professionals</p>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="feature">
                     <h4>Secure</h4>
-                    <p>Your data is safe with us</p>
+                    <p> Your data is protected with advanced security protocols</p>
                   </div>
                 </div>
               </div>

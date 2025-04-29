@@ -32,10 +32,8 @@ public class AppointmentService {
     public void deleteAppointment(Long id) {                        //Calls deleteById() from AppointmentRepository, which deletes an appointment by its ID from the database.
         appointmentRepository.deleteById(id);
     }
-//new
+
     public List<Appointment> getAppointmentsByPatientId(Long patientId) {
-        // This assumes you've added a patientId field to the Appointment entity
-        // Alternatively, you could filter by patientName if you're storing that
-        return appointmentRepository.findByPatientId(patientId);
+        return appointmentRepository.findByPatient_Id(patientId);
     }
 }
